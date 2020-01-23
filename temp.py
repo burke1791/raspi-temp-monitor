@@ -20,23 +20,27 @@ class bcolors:
 
 dhtDevice = adafruit_dht.DHT22(board.D4)
 
-def monitor():
-	while True:
-		get_temp()
-		time.sleep(2.0)
+class Monitor:
+	def __init__(self):
+		dhtDevice = adafruit_dht.DHT22(board.D4)
 
-def get_temp():
-	try:
-		temp_c = dhtDevice.temperature
-		humidity = dhtDevice.humidity
+	def monitor(self):
+		while True:
+			self.get_temp()
+			time.sleep(2.0)
 
-		t = datetime.now()
-		current_time = t.strftime('%m/%d/%Y %H:%M:%S')
+	def get_temp(self):
+		try:
+			temp_c = dhtDevice.temperature
+			humidity = dhtDevice.humidity
 
-		print(f'{bcolors.BOLD}Time:{bcolors.ENDC} {bcolors.OKBLUE}{current_time}{bcolors.ENDC}   {bcolors.BOLD}Temp:{bcolors.ENDC} {bcolors.OKBLUE}{temp_c:.1f} C{bcolors.ENDC}    {bcolors.BOLD}Humidity:{bcolors.ENDC} {bcolors.OKBLUE}{humidity}%{bcolors.ENDC}')
+			t = datetime.now()
+			current_time = t.strftime('%m/%d/%Y %H:%M:%S')
 
-	except RuntimeError as error:
-		#print(error.args[0])
-		dummy = 5
+			print(f'{bcolors.BOLD}Time:{bcolors.ENDC} {bcolors.OKBLUE}{current_time}{bcolors.ENDC}   {bcolors.BOLD}Temp:{bcolors.ENDC} {bcolors.OKBLUE}{temp_c:.1f} C{bcolors.ENDC}    {bcolors.BOLD}Humidity:{bcolors.ENDC} {bcolors.OKBLUE}{humidity}%{bcolors.ENDC}')
 
-monitor()
+		except RuntimeError as error:
+			#print(error.args[0])
+			dummy = 5
+
+Monitor.monitor()
