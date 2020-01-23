@@ -38,6 +38,14 @@ class Monitor:
 			t = datetime.now()
 			current_time = t.strftime('%m/%d/%Y %H:%M:%S')
 
+			record = {
+				'timestamp': t,
+				'temp_c': temp_c,
+				'humidity': humidity
+			}
+			print(record)
+			self.temps.append(record)
+			print(self.temps)
 			print(f'{bcolors.BOLD}Time:{bcolors.ENDC} {bcolors.OKBLUE}{current_time}{bcolors.ENDC}   {bcolors.BOLD}Temp:{bcolors.ENDC} {bcolors.OKBLUE}{temp_c:.1f} C{bcolors.ENDC}    {bcolors.BOLD}Humidity:{bcolors.ENDC} {bcolors.OKBLUE}{humidity}%{bcolors.ENDC}')
 
 		except RuntimeError as error:
