@@ -43,4 +43,4 @@ class Monitor:
 			#print(error.args[0])
 			dummy = 5
 
-Monitor.monitor()
+Monitor.monitor(Monitor)
