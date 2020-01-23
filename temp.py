@@ -23,6 +23,7 @@ dhtDevice = adafruit_dht.DHT22(board.D4)
 class Monitor:
 	def __init__(self):
 		dhtDevice = adafruit_dht.DHT22(board.D4)
+		temps = []
 
 	def monitor(self):
 		while True:
