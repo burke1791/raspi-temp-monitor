@@ -22,8 +22,8 @@ dhtDevice = adafruit_dht.DHT22(board.D4)
 
 class Monitor:
 	def __init__(self):
-		dhtDevice = adafruit_dht.DHT22(board.D4)
-		temps = []
+		self.dhtDevice = adafruit_dht.DHT22(board.D4)
+		self.temps = []
 
 	def monitor(self):
 		while True:
@@ -32,8 +32,8 @@ class Monitor:
 
 	def get_temp(self):
 		try:
-			temp_c = dhtDevice.temperature
-			humidity = dhtDevice.humidity
+			temp_c = self.dhtDevice.temperature
+			humidity = self.dhtDevice.humidity
 
 			t = datetime.now()
 			current_time = t.strftime('%m/%d/%Y %H:%M:%S')
