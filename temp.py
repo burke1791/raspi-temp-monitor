@@ -27,7 +27,7 @@ class Monitor:
 
 	def monitor(self):
 		while True:
-			self.get_temp()
+			self.get_temp(self)
 			time.sleep(2.0)
 
 	def get_temp(self):
