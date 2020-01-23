@@ -2,10 +2,16 @@ import adafruit_dht
 import board
 from datetime import datetime
 import time
+import statistics
 
-# ----------- User Settings --------------
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 
-# ----------------------------------------
+cred = credentials.Certificate('secret.json')
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 
 class bcolors:
@@ -18,17 +24,32 @@ class bcolors:
 	BOLD = '\033[1m'
 
 
-dhtDevice = adafruit_dht.DHT22(board.D4)
-
 class Monitor:
-	def __init__(self):
+	def __init__(self, location):
+		self.location = location
 		self.dhtDevice = adafruit_dht.DHT22(board.D4)
 		self.temps = []
+		self.humidities = []
+		self.beginTime = datetime.now()
+		self.endTime = 0
 
 	def monitor(self):
 		while True:
-			self.get_temp(self)
+			now = datetime.now()
+			difference = now - self.beginTime
+
+			if difference.seconds > 300:
+				self.aggregate()
+				self.reset()
+
+			self.get_temp()
 			time.sleep(2.0)
+
+	def reset(self):
+		self.beginTime = datetime.now()
+		self.endTime = 0
+		self.temps = []
+		self.humidities = []
 
 	def get_temp(self):
 		try:
@@ -38,21 +59,38 @@ class Monitor:
 			t = datetime.now()
 			current_time = t.strftime('%m/%d/%Y %H:%M:%S')
 
-			record = {
-				'timestamp': t,
-				'temp_c': temp_c,
-				'humidity': humidity
-			}
-			print(record)
-			self.temps.append(record)
-			print(self.temps)
-			print(f'{bcolors.BOLD}Time:{bcolors.ENDC} {bcolors.OKBLUE}{current_time}{bcolors.ENDC}   {bcolors.BOLD}Temp:{bcolors.ENDC} {bcolors.OKBLUE}{temp_c:.1f} C{bcolors.ENDC}    {bcolors.BOLD}Humidity:{bcolors.ENDC} {bcolors.OKBLUE}{humidity}%{bcolors.ENDC}')
+			self.temps.append(temp_c)
+			self.humidities.append(humidity)
 
 		except RuntimeError as error:
-			#print(error.args[0])
+			# print(error.args[0])
 			dummy = 5
 
+	def aggregate(self):
+		tempMed = statistics.median(self.temps)
+		humidityMed = statistics.median(self.humidities)
+		self.endTime = datetime.now()
 
-temp = Monitor()
+		self.send_aggregate(tempMed, humidityMed)
+
+	def send_aggregate(self, tempMed, humidityMed):
+		dataCount = len(self.temps)
+
+		record = {
+			'temp': tempMed,
+			'humidity': humidityMed,
+			'beginTime': self.beginTime.strftime('%m/%d/%Y %H:%M:%S'),
+			'endTime': self.endTime.strftime('%m/%d/%Y %H:%M:%S'),
+			'timestamp': firestore.SERVER_TIMESTAMP,
+			'location': self.location,
+			'recordCount': len(self.temps)
+		}
+
+		db.collection(u'temp_records').add(record)
+
+		print(f'Record Count: {dataCount}')
+
+
+temp = Monitor('Living Room')
 
 temp.monitor()
